@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="colorNames">
+		<item>Blue</item>
+		<item>Cyan</item>
+		<item>Green</item>
+		<item>Magenta</item>
+		<item>Orange</item>
+		<item>Purple</item>
+		<item>Red</item>
+		<item>White</item>
+		<item>Yellow</item>
+	</string-array>
+	<string-array name="colorValues">
+		<item>ff0000ff</item>
+		<item>ff00ffff</item>
+		<item>ff00ff00</item>
+		<item>ffff00ff</item>
+		<item>ffff5500</item>
+		<item>ff550055</item>
+		<item>ffff0000</item>
+		<item>ffffffff</item>
+		<item>ffffff00</item>
+	</string-array>
+
+	<string-array name="vibratePatternNames">
+		<item>Default</item>
+		<item>Short</item>
+		<item>Long</item>
+		<item>Multiple Short</item>
+		<item>Multiple Long</item>
+		<item>Short then Long</item>
+		<item>Long then Short</item>
+	</string-array>
+	<string-array name="vibratePatternPatterns">
+		<item>1</item>
+		<item>2</item>
+		<item>3</item>
+		<item>5</item>
+		<item>6</item>
+		<item>7</item>
+		<item>8</item>
+	</string-array>
+</resources>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.deadbeat.bluetoothnotifylib"
+      android:versionCode="1"
+      android:versionName="1.0">
+    <application android:icon="@drawable/icon" android:label="@string/app_name">
+		<service android:label="Bluetooth Notify (Service)" android:name="BTNotifyService">
+			<intent-filter>
+				<action android:name=".BTNotifyService"></action>
+			</intent-filter>
+		</service>
+    	<activity android:name="BluetoothNotifyWorker">
+    		<intent-filter>
+    			<action android:name=".BluetoothNotifyWorker"></action>
+    		</intent-filter>
+    	</activity>
+    	
+		<activity android:name=".DeviceOptions" android:label="Device Options">
+			<intent-filter>
+				<action android:name=".DeviceOptions"></action>
+			</intent-filter>
+		</activity>
+		<receiver android:name=".StartAtBootServiceReceiver">
+			<intent-filter>
+				<action android:name="android.intent.action.BOOT_COMPLETED" />
+				<category android:name="android.intent.category.HOME"/>
+			</intent-filter>
+		</receiver>
+    </application>
+
+
+</manifest> 
