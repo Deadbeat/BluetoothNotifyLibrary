@@ -19,11 +19,13 @@ import android.widget.Toast;
 
 public class DeviceOptions extends PreferenceActivity {
 	private CheckBoxPreference cRingtoneCheckBoxPreference;
+	private CheckBoxPreference cVibrateCheckboxPreference;
+
 	String deviceAddress;
 
 	String deviceName;
-
 	private CheckBoxPreference dRingtoneCheckBoxPreference;
+	private CheckBoxPreference dVibrateCheckboxPreference;
 	private Globals globals;
 	OnSharedPreferenceChangeListener ospcListener;
 	private String pConnectCustomPattern;
@@ -32,9 +34,9 @@ public class DeviceOptions extends PreferenceActivity {
 	private String pConnectLEDColor;
 	private boolean pConnectLEDEnable;
 	private boolean pConnectNotificationEnable;
+
 	private String pConnectRingtone;
 	private boolean pConnectRingtoneEnable;
-
 	private boolean pConnectToastEnable;
 	private boolean pConnectVibrateEnable;
 	private String pConnectVibratePattern;
@@ -45,12 +47,12 @@ public class DeviceOptions extends PreferenceActivity {
 	private boolean pDisconnectEnable;
 	private String pDisconnectLEDColor;
 	private boolean pDisconnectLEDEnable;
+
 	private boolean pDisconnectNotificationEnable;
 	private String pDisconnectRingtone;
 
 	private boolean pDisconnectRingtoneEnable;
 	private boolean pDisconnectToastEnable;
-
 	private boolean pDisconnectVibrateEnable;
 	private String pDisconnectVibratePattern;
 	PreferenceActivity preferenceActivity;
@@ -69,7 +71,8 @@ public class DeviceOptions extends PreferenceActivity {
 		// Connect Preferences
 		this.pConnectEnable = this.prefs.getBoolean("pref_connect_enable", true);
 		this.pConnectRingtoneEnable = this.prefs.getBoolean("pref_connect_ringtone_enable", true);
-		this.pConnectRingtone = this.prefs.getString("pref_connect_ringtone", "content://settings/system/notification_sound");
+		this.pConnectRingtone = this.prefs.getString("pref_connect_ringtone",
+				"content://settings/system/notification_sound");
 		this.pConnectLEDEnable = this.prefs.getBoolean("pref_connect_led_enable", false);
 		this.pConnectLEDColor = this.prefs.getString("pref_connect_led_color", "ff0000ff");
 		this.pConnectNotificationEnable = this.prefs.getBoolean("pref_connect_notification_enable", false);
@@ -121,7 +124,8 @@ public class DeviceOptions extends PreferenceActivity {
 		this.worker = new BluetoothNotifyWorker(this, getGlobals());
 
 		this.deviceName = this.deviceName.replaceAll(" ", "");
-		this.worker.doLog("==> Displaying preferences for device: " + this.deviceName + " (" + this.deviceAddress + ")");
+		this.worker
+				.doLog("==> Displaying preferences for device: " + this.deviceName + " (" + this.deviceAddress + ")");
 
 		// Strip spaces from device name for preference filename
 		this.deviceAddress = this.deviceAddress.replaceAll(":", "-");
@@ -209,21 +213,42 @@ public class DeviceOptions extends PreferenceActivity {
 
 		// If this is the free version - force disable audio notification
 		if (getGlobals().isFreeVersion() == true) {
+			// Disable connect ringtone
 			this.cRingtoneCheckBoxPreference = (CheckBoxPreference) getPreferenceScreen().findPreference(
 					"pref_connect_ringtone_enable");
-			this.cRingtoneCheckBoxPreference.setSummary("Disabled in free version.\nGet the full version to enable this option.");
+			this.cRingtoneCheckBoxPreference
+					.setSummary("Disabled in free version.\nGet the full version to enable this option.");
 			this.cRingtoneCheckBoxPreference.setSelectable(false);
 			this.cRingtoneCheckBoxPreference.setChecked(false);
 
+			// Disable disconnect ringtone
 			this.dRingtoneCheckBoxPreference = (CheckBoxPreference) getPreferenceScreen().findPreference(
 					"pref_disconnect_ringtone_enable");
-			this.dRingtoneCheckBoxPreference.setSummary("Disabled in free version.\nGet the full version to enable this option.");
+			this.dRingtoneCheckBoxPreference
+					.setSummary("Disabled in free version.\nGet the full version to enable this option.");
 			this.dRingtoneCheckBoxPreference.setSelectable(false);
 			this.dRingtoneCheckBoxPreference.setChecked(false);
+
+			// Disable connect vibrate (oh they gonna be so pissed)
+			this.cVibrateCheckboxPreference = (CheckBoxPreference) getPreferenceScreen().findPreference(
+					"pref_connect_vibrate_enable");
+			this.cVibrateCheckboxPreference
+					.setSummary("Disabled in the free version.\nGet the full version to enable this option.");
+			this.cVibrateCheckboxPreference.setSelectable(false);
+			this.cVibrateCheckboxPreference.setChecked(false);
+
+			this.dVibrateCheckboxPreference = (CheckBoxPreference) getPreferenceScreen().findPreference(
+					"pref_disconnect_vibrate_enable");
+			this.dVibrateCheckboxPreference
+					.setSummary("Disabled in the free version.\nGet the full version to enable this option.");
+			this.dVibrateCheckboxPreference.setSelectable(false);
+			this.dVibrateCheckboxPreference.setChecked(false);
 
 			Editor prefsEditor = this.prefs.edit();
 			prefsEditor.putBoolean("pref_connect_ringtone_enable", false);
 			prefsEditor.putBoolean("pref_disconnect_ringtone_enable", false);
+			prefsEditor.putBoolean("pref_connect_vibrate_enable", false);
+			prefsEditor.putBoolean("pref_disconnect_vibrate_enable", false);
 			prefsEditor.commit();
 		}
 
@@ -287,7 +312,8 @@ public class DeviceOptions extends PreferenceActivity {
 		properties.setProperty("pDisconnectRingtone", this.pDisconnectRingtone);
 		properties.setProperty("pDisconnectLEDEnable", new Boolean(this.pDisconnectLEDEnable).toString());
 		properties.setProperty("pDisconnectLEDColor", this.pDisconnectLEDColor);
-		properties.setProperty("pDisconnectNotificationEnable", new Boolean(this.pDisconnectNotificationEnable).toString());
+		properties.setProperty("pDisconnectNotificationEnable", new Boolean(this.pDisconnectNotificationEnable)
+				.toString());
 		properties.setProperty("pDisconnectToastEnable", new Boolean(this.pDisconnectToastEnable).toString());
 		properties.setProperty("pDisconnectVibrateEnable", new Boolean(this.pDisconnectVibrateEnable).toString());
 		properties.setProperty("pDisconnectVibratePattern", this.pDisconnectVibratePattern);
@@ -301,14 +327,15 @@ public class DeviceOptions extends PreferenceActivity {
 			properties.storeToXML(fileOut, this.deviceName);
 			fileOut.close();
 		} catch (FileNotFoundException e) {
-			Log
-					.e(getGlobals().getLogPrefix(), "ER> (DeviceOptions) Preferences File not found for device: "
-							+ this.deviceAddress);
-			Toast.makeText(this, "Error writing device options, please email the developer!", Toast.LENGTH_SHORT).show();
+			Log.e(getGlobals().getLogPrefix(), "ER> (DeviceOptions) Preferences File not found for device: "
+					+ this.deviceAddress);
+			Toast.makeText(this, "Error writing device options, please email the developer!", Toast.LENGTH_SHORT)
+					.show();
 			e.printStackTrace();
 			finish();
 		} catch (IOException e) {
-			Toast.makeText(this, "Error writing device options, please email the developer!", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Error writing device options, please email the developer!", Toast.LENGTH_SHORT)
+					.show();
 			e.printStackTrace();
 			finish();
 		}

@@ -161,6 +161,12 @@
 				android:entries="@array/vibratePatternNames"
 				android:entryValues="@array/vibratePatternPatterns"
 				android:dependency="pref_disconnect_vibrate_enable"/>
+			<EditTextPreference
+				android:title="Custom Pattern"
+				android:summary="Define custom vibrate pattern"
+				android:key="pref_disconnect_custom_pattern"
+				android:defaultValue="250,100,250"
+				android:dependency="pref_disconnect_vibrate_enable"/>
 		</PreferenceCategory>
 	</PreferenceScreen>
 </PreferenceScreen>
