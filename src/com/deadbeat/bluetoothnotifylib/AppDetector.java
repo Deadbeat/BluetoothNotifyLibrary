@@ -6,31 +6,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 
+/*
+ * Detect installed apps and manifest data
+ */
 public class AppDetector {
-	protected boolean isAppInstalled(Service parent, String uri) {
-		PackageManager pm = parent.getPackageManager();
-		return isInstalledHelper(pm, uri);
-	}
-	
-	public boolean isAppInstalled(Activity parent, String uri) {
-		PackageManager pm = parent.getPackageManager();
-		return isInstalledHelper(pm, uri);
-	}
-	
-	 boolean isInstalledHelper(PackageManager pm, String uri) {
-		 boolean installed = false;
-		 try {
-			 pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
-			 installed = true;
-		 } catch (PackageManager.NameNotFoundException e) {
-			 installed = false;
-		 }
-		 return installed;
-	}
-
 	/**
-	 * getVersion
-	 * Desc: Get the version tag of the app at specified URI
+	 * getVersion Desc: Get the version tag of the app at specified URI
+	 * 
 	 * @param parent
 	 * @param uri
 	 * @return
@@ -45,5 +27,29 @@ public class AppDetector {
 			version = "0.0";
 		}
 		return version;
+	}
+
+	/*
+	 * Determine if package is installed by name
+	 */
+	public boolean isAppInstalled(Activity parent, String uri) {
+		PackageManager pm = parent.getPackageManager();
+		return isInstalledHelper(pm, uri);
+	}
+
+	protected boolean isAppInstalled(Service parent, String uri) {
+		PackageManager pm = parent.getPackageManager();
+		return isInstalledHelper(pm, uri);
+	}
+
+	boolean isInstalledHelper(PackageManager pm, String uri) {
+		boolean installed = false;
+		try {
+			pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
+			installed = true;
+		} catch (PackageManager.NameNotFoundException e) {
+			installed = false;
+		}
+		return installed;
 	}
 }

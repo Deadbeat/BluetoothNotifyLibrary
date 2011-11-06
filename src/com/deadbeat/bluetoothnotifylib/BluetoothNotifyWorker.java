@@ -19,7 +19,9 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class BluetoothNotifyWorker extends Activity {
 
-	/** Join: Join array of strings with specified delimiter */
+	/*
+	 * Join: Join array of strings with specified delimiter (Helper function)
+	 */
 	public static String join(String[] s, String delimiter) {
 		String buffer = "";
 		for (int i = 0; i < s.length; i++) {
@@ -48,6 +50,10 @@ public class BluetoothNotifyWorker extends Activity {
 		this.parent = parent;
 	}
 
+	/*
+	 * Pop up dialog with @error message displayed. Dialog displayed with on
+	 * "OK" button for dismiss
+	 */
 	public void alertError(String error) {
 		doLog("==> Alert error");
 		AlertDialog.Builder builder = new AlertDialog.Builder(this.parent);
@@ -61,24 +67,25 @@ public class BluetoothNotifyWorker extends Activity {
 	/** Display a clickable ListView of BT devices paired to the phone */
 	public void buildDeviceListView(String version) {
 		doLog("--> Display device list");
-		// Display list of devices
+		// Log list of devices
 		doLog("--> btDeviceName_ar = " + this.btDeviceName_ar.toString());
 		doLog("--> btDeviceAddress_ar = " + this.btDeviceAddress_ar.toString());
-		doLog("--> List = " + android.R.layout.simple_list_item_1);
 		doLog("--> Parent = " + this.parent.toString());
 		this.btDeviceList = (ListView) this.parent.findViewById(R.id.list_bluetooth_devices);
 		this.btDeviceList.setAdapter(new ArrayAdapter<String>(this.parent, android.R.layout.simple_list_item_1,
 				this.btDeviceName_ar));
 
+		/* Display app version in text resource */
 		TextView versionDisplay = (TextView) this.parent.findViewById(R.id.text_main_screen_version);
 		versionDisplay.setText("v." + version);
+
 		// Make device list clickable
 		this.btDeviceList.setTextFilterEnabled(true);
 		this.btDeviceList.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> a, View v, int position, long id) {
-				// Do something when clicked
 
+				// Launch preferences for a device when clicked
 				Intent devicePreferencesActivity = new Intent(BluetoothNotifyWorker.this.parent.getBaseContext(),
 						com.deadbeat.bluetoothnotifylib.DeviceOptions.class);
 				devicePreferencesActivity.putExtra("deviceName", BluetoothNotifyWorker.this.btDeviceName_ar
@@ -92,6 +99,10 @@ public class BluetoothNotifyWorker extends Activity {
 		});
 	}
 
+	/*
+	 * Validate custom vibrate pattern. It cannot contain non numeric chars or
+	 * whitespace.
+	 */
 	public boolean customVibePatternValid(String input, String type) {
 		String[] pattern = input.split(",");
 		// Verify custom vibe pattern does not include whitespace and is numeric
@@ -100,6 +111,8 @@ public class BluetoothNotifyWorker extends Activity {
 
 			for (int j = 0; j < pattern[i].length(); j++) {
 				int p = pattern[i].charAt(j);
+
+				// Check for characters below ASCII 48 or above ASCII 57
 				if (p < 48 || p > 57) {
 					// value IS NOT numeric
 					doLog("==> Value: " + pattern[i].toString() + " is not numeric.  Forcing 0");
@@ -108,6 +121,7 @@ public class BluetoothNotifyWorker extends Activity {
 			}
 		}
 
+		// If there's an inconsistency, alert the user
 		if (this.customVibeError == true) {
 			alertError("The "
 					+ type
