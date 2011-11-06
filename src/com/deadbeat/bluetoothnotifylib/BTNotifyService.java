@@ -34,7 +34,8 @@ public class BTNotifyService extends Service {
 			final String mAction = intent.getAction();
 			Bundle mExtra = intent.getExtras();
 
-			if (mAction.equals(getGlobals().getActionACLConnected()) || mAction.equals(getGlobals().getActionACLDisconnected())) {
+			if (mAction.equals(getGlobals().getActionACLConnected())
+					|| mAction.equals(getGlobals().getActionACLDisconnected())) {
 				String device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(
 						mExtra.get(getGlobals().getExtraDevice()).toString()).getAddress();
 				getWorker().doLog("--> State changed for device (" + device + ")");
@@ -57,7 +58,7 @@ public class BTNotifyService extends Service {
 	}
 
 	@Override
-	public IBinder onBind(Intent inetent) {
+	public IBinder onBind(Intent intent) {
 		return null;
 	}
 
@@ -70,13 +71,12 @@ public class BTNotifyService extends Service {
 		intentToReceiveFilter.addAction("android.bluetooth.device.action.ACL_CONNECTED");
 		intentToReceiveFilter.addAction("android.bluetooth.device.action.ACL_DISCONNECTED");
 		registerReceiver(this.mIntentReceiver, intentToReceiveFilter, null, this.mHandler);
-		Log.d("BluetoothNotify", "Bluetooth State Receiver registered");
+		Log.d("BluetoothNotify", ">>> Bluetooth State Receiver registered");
 	}
 
 	@Override
 	public void onDestroy() {
-		getWorker().doLog(
-				"Service Destroyed :(\nService Destroyed :(\nService Destroyed :(\nService Destroyed :(\nService Destroyed :(\n");
+		getWorker().doLog("Service Destroyed :(\n");
 		unregisterReceiver(this.mIntentReceiver);
 	}
 
@@ -84,17 +84,17 @@ public class BTNotifyService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		setIntent(intent);
 		// Continue running until explicitly stopped - set sticky
-		Bundle extras = getIntent().getExtras();
+		Bundle extras = intent.getExtras();
 		if (extras != null) {
 			setGlobals((Globals) extras.getSerializable("Globals"));
 		}
 		if (getGlobals() == null) {
-			Log.e("BluetoothNotify", "Call an ambulance!  Service has no globals!");
+			Log.e("BluetoothNotify", "!!! Call an ambulance!  Service has no globals!");
 		}
 		Log.i(getGlobals().getLogPrefix(), ">>> Bluetooth Notify Service starting up");
 
 		setWorker(new BTNotifyServiceWorker(this, getGlobals()));
-		getWorker().doLog("--> Worker Set");
+		getWorker().doLog("Service Worker Set and Active");
 
 		AppDetector detect = new AppDetector();
 
@@ -102,7 +102,7 @@ public class BTNotifyService extends Service {
 			getWorker().shutdownOnConflict();
 		}
 
-		return START_STICKY;
+		return START_REDELIVER_INTENT;
 	}
 
 	private void setGlobals(Globals globals) {
