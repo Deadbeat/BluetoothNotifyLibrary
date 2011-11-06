@@ -3,6 +3,9 @@ package com.deadbeat.bluetoothnotifylib;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import android.app.Notification;
@@ -57,7 +60,7 @@ public class DeviceOptions extends PreferenceActivity {
 	private String pDisconnectVibratePattern;
 	PreferenceActivity preferenceActivity;
 	SharedPreferences prefs;
-	BluetoothNotifyWorker worker;
+	private BluetoothNotifyWorker worker;
 
 	public Globals getGlobals() {
 		return this.globals;
@@ -81,8 +84,8 @@ public class DeviceOptions extends PreferenceActivity {
 		this.pConnectVibratePattern = this.prefs.getString("pref_connect_vibrate_pattern", "1");
 		this.pConnectCustomPattern = this.prefs.getString("pref_connect_custom_pattern", "100,50,100");
 
-		if (this.worker.customVibePatternValid(this.pConnectCustomPattern, "connect") != true) {
-			this.worker.doLog("==> Overriding connect pattern (" + this.pConnectCustomPattern + ")");
+		if (getWorker().customVibePatternValid(this.pConnectCustomPattern, "connect") != true) {
+			getWorker().doLog("==> Overriding connect pattern (" + this.pConnectCustomPattern + ")");
 			this.pConnectCustomPattern = "250,100,250";
 			Editor prefsEditor = this.prefs.edit();
 			prefsEditor.putString("pref_connect_custom_pattern", this.pConnectCustomPattern);
@@ -102,13 +105,17 @@ public class DeviceOptions extends PreferenceActivity {
 		this.pDisconnectVibratePattern = this.prefs.getString("pref_disconnect_vibrate_pattern", "1");
 		this.pDisconnectCustomPattern = this.prefs.getString("pref_disconnect_custom_pattern", "100,50,100");
 
-		if (this.worker.customVibePatternValid(this.pDisconnectCustomPattern, "connect") != true) {
-			this.worker.doLog("==> Overriding connect pattern (" + this.pDisconnectCustomPattern + ")");
+		if (getWorker().customVibePatternValid(this.pDisconnectCustomPattern, "connect") != true) {
+			getWorker().doLog("==> Overriding connect pattern (" + this.pDisconnectCustomPattern + ")");
 			this.pDisconnectCustomPattern = "250,100,250";
 			Editor prefsEditor = this.prefs.edit();
 			prefsEditor.putString("pref_disconnect_custom_pattern", this.pDisconnectCustomPattern);
 			prefsEditor.commit();
 		}
+	}
+
+	public BluetoothNotifyWorker getWorker() {
+		return this.worker;
 	}
 
 	@Override
@@ -121,16 +128,16 @@ public class DeviceOptions extends PreferenceActivity {
 			setGlobals((Globals) extras.getSerializable("Globals"));
 		}
 
-		this.worker = new BluetoothNotifyWorker(this, getGlobals());
+		this.setWorker(new BluetoothNotifyWorker(this, getGlobals()));
 
 		this.deviceName = this.deviceName.replaceAll(" ", "");
-		this.worker
+		getWorker()
 				.doLog("==> Displaying preferences for device: " + this.deviceName + " (" + this.deviceAddress + ")");
 
 		// Strip spaces from device name for preference filename
 		this.deviceAddress = this.deviceAddress.replaceAll(":", "-");
 
-		this.worker.doLog("==> Setting preferenceManager.sharedPreferenceName: " + this.deviceAddress);
+		getWorker().doLog("==> Setting preferenceManager.sharedPreferenceName: " + this.deviceAddress);
 		getPreferenceManager().setSharedPreferencesName(this.deviceAddress);
 		this.prefs = getPreferenceManager().getSharedPreferences();
 
@@ -138,6 +145,7 @@ public class DeviceOptions extends PreferenceActivity {
 		// properties every time a pref is changed... so... hope it's not rough
 		// on performance.
 		this.ospcListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
@@ -200,6 +208,46 @@ public class DeviceOptions extends PreferenceActivity {
 						notification.vibrate = getGlobals().getPatternVibrateLongShort();
 					}
 
+					vnm.notify(5089250, notification);
+				}
+				// Preview custom vibe patterns
+				else if (key.contains("_custom_pattern") && thisDeviceEnabled == true) {
+					String[] pattern = sharedPreferences.getString(key, "250,100,150").split(",");
+					long[] vibrateCustomPattern;
+					List list = new ArrayList();
+					// Verify custom vibe pattern does not include whitespace
+					// and is numeric
+					for (int i = 0; i < pattern.length; i++) {
+						pattern[i] = pattern[i].trim();
+
+						for (int j = 0; j < pattern[i].length(); j++) {
+							int p = pattern[i].charAt(j);
+							if (p < 48 || p > 57) {
+								// value IS NOT numeric
+								pattern[i] = "0";
+							}
+						}
+					}
+					getWorker().doLog("==> Previewing Pattern: " + Arrays.toString(pattern));
+
+					Long init = Long.valueOf("0");
+					list.add(init);
+					for (int i = 0; i < pattern.length; i++) {
+						Long tmp = Long.valueOf(pattern[i]);
+						list.add(tmp);
+					}
+
+					Long[] vCustomPattern = (Long[]) list.toArray(new Long[0]);
+
+					vibrateCustomPattern = new long[vCustomPattern.length];
+					int i = 0;
+					for (Long temp : vCustomPattern) {
+						vibrateCustomPattern[i++] = temp;
+					}
+
+					NotificationManager vnm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+					Notification notification = new Notification();
+					notification.vibrate = vibrateCustomPattern;
 					vnm.notify(5089250, notification);
 				}
 			}
@@ -275,7 +323,7 @@ public class DeviceOptions extends PreferenceActivity {
 
 		// Stop listening for changes when not on this screen
 		this.prefs.unregisterOnSharedPreferenceChangeListener(this.ospcListener);
-		this.worker.doLog("==> Unregister Change Listener");
+		getWorker().doLog("==> Unregister Change Listener");
 
 	}
 
@@ -288,7 +336,7 @@ public class DeviceOptions extends PreferenceActivity {
 	private void saveSharedPreferencesToFile() {
 
 		// Write preferences to properties file
-		this.worker.doLog("==> Setting properties");
+		getWorker().doLog("==> Setting properties");
 		Properties properties = new Properties();
 
 		// Device Enabled
@@ -321,9 +369,9 @@ public class DeviceOptions extends PreferenceActivity {
 
 		try {
 			String propertiesFileName = this.deviceAddress + ".properties";
-			this.worker.doLog("==> Setting file name: " + propertiesFileName);
+			getWorker().doLog("==> Setting file name: " + propertiesFileName);
 			FileOutputStream fileOut = openFileOutput(propertiesFileName, Context.MODE_WORLD_READABLE);
-			this.worker.doLog("==> Writing properties");
+			getWorker().doLog("==> Writing properties");
 			properties.storeToXML(fileOut, this.deviceName);
 			fileOut.close();
 		} catch (FileNotFoundException e) {
@@ -344,5 +392,9 @@ public class DeviceOptions extends PreferenceActivity {
 
 	public void setGlobals(Globals globals) {
 		this.globals = globals;
+	}
+
+	public void setWorker(BluetoothNotifyWorker worker) {
+		this.worker = worker;
 	}
 }

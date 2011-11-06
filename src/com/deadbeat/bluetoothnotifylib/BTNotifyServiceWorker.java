@@ -78,7 +78,7 @@ public class BTNotifyServiceWorker extends Activity {
 				}
 			}
 		}
-		doLog("==> String Pattern: " + Arrays.toString(pattern));
+		doLog("String Pattern: " + Arrays.toString(pattern));
 
 		Long init = Long.valueOf("0");
 		list.add(init);
@@ -94,7 +94,7 @@ public class BTNotifyServiceWorker extends Activity {
 		for (Long temp : vCustomPattern) {
 			this.vibrateCustomPattern[i++] = temp;
 		}
-		doLog("==> Long Pattern: " + Arrays.toString(this.vibrateCustomPattern));
+		doLog("Long Pattern: " + Arrays.toString(this.vibrateCustomPattern));
 	}
 
 	/**
@@ -217,7 +217,7 @@ public class BTNotifyServiceWorker extends Activity {
 				return false;
 			}
 		} else {
-			Log.e(getGlobals().getLogPrefix(), ">>> Requested device property (" + propertyKey + ") was not found");
+			doLog("Requested device property (" + propertyKey + ") was not found");
 			return false;
 		}
 	}
@@ -244,8 +244,8 @@ public class BTNotifyServiceWorker extends Activity {
 			fileIn.close();
 
 		} catch (FileNotFoundException e) {
-			Log.w(getGlobals().getLogPrefix(),
-					">>> Bluetooth device connected, but no device config file found.  Ignoring device.");
+			Log.e(getGlobals().getLogPrefix(),
+					"ER> Bluetooth device connected, but no device config file found.  Ignoring device.");
 			e.printStackTrace();
 		} catch (IOException e) {
 			Log.e(getGlobals().getLogPrefix(), "ER> IOException reading device properties");
@@ -263,7 +263,7 @@ public class BTNotifyServiceWorker extends Activity {
 			doLog("Property (" + propertyKey + ") found: " + propertyValue);
 			return propertyValue;
 		} else {
-			Log.e(getGlobals().getLogPrefix(), ">>> Requested device property (" + propertyKey + ") was not found");
+			doLog("Requested device property (" + propertyKey + ") was not found");
 			return null;
 		}
 	}
@@ -418,7 +418,7 @@ public class BTNotifyServiceWorker extends Activity {
 	protected void shutdownOnConflict() {
 		// We need to exit the service if other version (free/paid) are
 		// installed.
-		Log.e(getGlobals().getLogPrefix(), ">>> Service shutdown: Multiple versions installed.");
+		doLog("Service shutdown: Multiple versions installed.");
 		this.parent.stopSelf();
 	}
 }

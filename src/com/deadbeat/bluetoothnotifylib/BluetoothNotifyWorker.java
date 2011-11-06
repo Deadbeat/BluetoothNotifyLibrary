@@ -81,8 +81,10 @@ public class BluetoothNotifyWorker extends Activity {
 
 				Intent devicePreferencesActivity = new Intent(BluetoothNotifyWorker.this.parent.getBaseContext(),
 						com.deadbeat.bluetoothnotifylib.DeviceOptions.class);
-				devicePreferencesActivity.putExtra("deviceName", BluetoothNotifyWorker.this.btDeviceName_ar.get(position));
-				devicePreferencesActivity.putExtra("deviceAddress", BluetoothNotifyWorker.this.btDeviceAddress_ar.get(position));
+				devicePreferencesActivity.putExtra("deviceName", BluetoothNotifyWorker.this.btDeviceName_ar
+						.get(position));
+				devicePreferencesActivity.putExtra("deviceAddress", BluetoothNotifyWorker.this.btDeviceAddress_ar
+						.get(position));
 				devicePreferencesActivity.putExtra("Globals", BluetoothNotifyWorker.this.globals);
 				BluetoothNotifyWorker.this.parent.startActivity(devicePreferencesActivity);
 
@@ -144,7 +146,7 @@ public class BluetoothNotifyWorker extends Activity {
 				}
 			}
 		} catch (Exception e) {
-			Log.e(getGlobals().getLogPrefix(), "--> There was an error fetching paired devices");
+			Log.e(getGlobals().getLogPrefix(), "ER> There was an error fetching paired devices");
 			e.printStackTrace();
 		}
 	}

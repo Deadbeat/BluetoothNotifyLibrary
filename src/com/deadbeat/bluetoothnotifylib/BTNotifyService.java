@@ -84,7 +84,7 @@ public class BTNotifyService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		setIntent(intent);
 		// Continue running until explicitly stopped - set sticky
-		Bundle extras = intent.getExtras();
+		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			setGlobals((Globals) extras.getSerializable("Globals"));
 		}
