@@ -29,6 +29,7 @@ public class DeviceOptions extends PreferenceActivity {
 	String deviceName;
 	private CheckBoxPreference dRingtoneCheckBoxPreference;
 	private CheckBoxPreference dVibrateCheckboxPreference;
+	private boolean freeVersion;
 	private Globals globals;
 	OnSharedPreferenceChangeListener ospcListener;
 	private String pConnectCustomPattern;
@@ -36,8 +37,8 @@ public class DeviceOptions extends PreferenceActivity {
 	private boolean pConnectEnable;
 	private String pConnectLEDColor;
 	private boolean pConnectLEDEnable;
-	private boolean pConnectNotificationEnable;
 
+	private boolean pConnectNotificationEnable;
 	private String pConnectRingtone;
 	private boolean pConnectRingtoneEnable;
 	private boolean pConnectToastEnable;
@@ -49,11 +50,11 @@ public class DeviceOptions extends PreferenceActivity {
 	// Disconnect Variables
 	private boolean pDisconnectEnable;
 	private String pDisconnectLEDColor;
+
 	private boolean pDisconnectLEDEnable;
-
 	private boolean pDisconnectNotificationEnable;
-	private String pDisconnectRingtone;
 
+	private String pDisconnectRingtone;
 	private boolean pDisconnectRingtoneEnable;
 	private boolean pDisconnectToastEnable;
 	private boolean pDisconnectVibrateEnable;
@@ -118,6 +119,10 @@ public class DeviceOptions extends PreferenceActivity {
 		return this.worker;
 	}
 
+	public boolean isFreeVersion() {
+		return this.freeVersion;
+	}
+
 	@Override
 	protected void onCreate(Bundle btNotify) {
 		super.onCreate(btNotify);
@@ -128,13 +133,15 @@ public class DeviceOptions extends PreferenceActivity {
 			setGlobals((Globals) extras.getSerializable("Globals"));
 		}
 
-		this.setWorker(new BluetoothNotifyWorker(this, getGlobals()));
+		setFreeVersion(getResources().getBoolean(R.bool.freeVersion));
 
+		this.setWorker(new BluetoothNotifyWorker(this));
+
+		// Strip spaces from device name for preference filename
 		this.deviceName = this.deviceName.replaceAll(" ", "");
 		getWorker()
 				.doLog("==> Displaying preferences for device: " + this.deviceName + " (" + this.deviceAddress + ")");
 
-		// Strip spaces from device name for preference filename
 		this.deviceAddress = this.deviceAddress.replaceAll(":", "-");
 
 		getWorker().doLog("==> Setting preferenceManager.sharedPreferenceName: " + this.deviceAddress);
@@ -260,7 +267,7 @@ public class DeviceOptions extends PreferenceActivity {
 		getPrefs();
 
 		// If this is the free version - force disable audio notification
-		if (getGlobals().isFreeVersion() == true) {
+		if (isFreeVersion() == true) {
 			// Disable connect ringtone
 			this.cRingtoneCheckBoxPreference = (CheckBoxPreference) getPreferenceScreen().findPreference(
 					"pref_connect_ringtone_enable");
@@ -388,6 +395,10 @@ public class DeviceOptions extends PreferenceActivity {
 			finish();
 		}
 
+	}
+
+	public void setFreeVersion(boolean freeVersion) {
+		this.freeVersion = freeVersion;
 	}
 
 	public void setGlobals(Globals globals) {

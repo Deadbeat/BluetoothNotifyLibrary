@@ -22,12 +22,13 @@ public class BTNotifyService extends Service {
 		}
 	}
 
+	private boolean freeVersion;
 	private Globals globals;
 	private Intent intent;
+
+	private final Handler mHandler = new Handler();
 	// Create BroadcastReceiver - We will listen for connect/disconnect for BT
 	// devices
-	private final Handler mHandler = new Handler();
-
 	private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -57,6 +58,10 @@ public class BTNotifyService extends Service {
 		return this.worker;
 	}
 
+	public boolean isFreeVersion() {
+		return this.freeVersion;
+	}
+
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
@@ -66,12 +71,25 @@ public class BTNotifyService extends Service {
 	public void onCreate() {
 		// Create
 		super.onCreate();
+		Log.d("BluetoothNotify", ">>> onCreate()");
+		setFreeVersion(getResources().getBoolean(R.bool.freeVersion));
+		setGlobals(new Globals());
+		setWorker(new BTNotifyServiceWorker(this));
+		getWorker().doLog(getWorker().getTimestamp() + " Service Worker Set and Active");
+		getWorker().doLog("FreeVersion = " + isFreeVersion());
+
 		// Register BroadcastReceiver with connect and disconnect actions
 		IntentFilter intentToReceiveFilter = new IntentFilter();
 		intentToReceiveFilter.addAction("android.bluetooth.device.action.ACL_CONNECTED");
 		intentToReceiveFilter.addAction("android.bluetooth.device.action.ACL_DISCONNECTED");
 		registerReceiver(this.mIntentReceiver, intentToReceiveFilter, null, this.mHandler);
-		Log.d("BluetoothNotify", ">>> Bluetooth State Receiver registered");
+		getWorker().doLog("Bluetooth State Receiver registered");
+
+		AppDetector detect = new AppDetector();
+
+		if (detect.isAppInstalled(this, "com.deadbeat.bluetoothnotifyfree") == true) {
+			getWorker().shutdownOnConflict();
+		}
 	}
 
 	@Override
@@ -82,36 +100,34 @@ public class BTNotifyService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		setIntent(intent);
-		// Continue running until explicitly stopped - set sticky
-		Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			setGlobals((Globals) extras.getSerializable("Globals"));
-		}
-		if (getGlobals() == null) {
-			Log.e("BluetoothNotify", "!!! Call an ambulance!  Service has no globals!");
-		}
-		Log.i(getGlobals().getLogPrefix(), ">>> Bluetooth Notify Service starting up");
+		Log.d("BluetoothNotify", ">>> onStartCommand()");
+		// setIntent(intent);
+		// // Continue running until explicitly stopped - set sticky
+		// Bundle extras = getIntent().getExtras();
+		// if (extras != null) {
+		// setGlobals((Globals) extras.getSerializable("Globals"));
+		// }
+		// if (getGlobals() == null) {
+		// Log.e("BluetoothNotify",
+		// "!!! Call an ambulance!  Service has no globals!");
+		// }
+		// Log.i(getGlobals().getLogPrefix(),
+		// ">>> Bluetooth Notify Service starting up");
 
-		setWorker(new BTNotifyServiceWorker(this, getGlobals()));
-		getWorker().doLog("Service Worker Set and Active");
+		return START_STICKY;
+	}
 
-		AppDetector detect = new AppDetector();
-
-		if (detect.isAppInstalled(this, "com.deadbeat.bluetoothnotifyfree") == true) {
-			getWorker().shutdownOnConflict();
-		}
-
-		return START_REDELIVER_INTENT;
+	public void setFreeVersion(boolean freeVersion) {
+		this.freeVersion = freeVersion;
 	}
 
 	private void setGlobals(Globals globals) {
 		this.globals = globals;
 	}
 
-	private void setIntent(Intent intent) {
-		this.intent = intent;
-	}
+	// private void setIntent(Intent intent) {
+	// this.intent = intent;
+	// }
 
 	private void setWorker(BTNotifyServiceWorker worker) {
 		this.worker = worker;

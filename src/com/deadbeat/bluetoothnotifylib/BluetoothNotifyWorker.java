@@ -1,6 +1,8 @@
 package com.deadbeat.bluetoothnotifylib;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Set;
 
 import android.app.Activity;
@@ -34,19 +36,22 @@ public class BluetoothNotifyWorker extends Activity {
 	}
 
 	BluetoothAdapter BTAdapter = BluetoothAdapter.getDefaultAdapter();
+
 	public ArrayList<String> btDeviceAddress_ar = new ArrayList<String>();
 	public ListView btDeviceList;
 	public ArrayList<String> btDeviceName_ar = new ArrayList<String>();
-
 	private boolean customVibeError = false;
+
+	private boolean freeVersion;
 
 	private Globals globals;
 
 	private Activity parent;
 
 	/** Constructor */
-	public BluetoothNotifyWorker(Activity parent, Globals globals) {
-		setGlobals(globals);
+	public BluetoothNotifyWorker(Activity parent) {
+		setGlobals(new Globals());
+		setFreeVersion(parent.getResources().getBoolean(R.bool.freeVersion));
 		this.parent = parent;
 	}
 
@@ -169,6 +174,21 @@ public class BluetoothNotifyWorker extends Activity {
 		return this.globals;
 	}
 
+	public String getTimestamp() {
+		Date todaysDate = new java.util.Date();
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy/HH:mm:ss");
+		String formattedDate = formatter.format(todaysDate);
+		return formattedDate;
+	}
+
+	public boolean isFreeVersion() {
+		return this.freeVersion;
+	}
+
+	public void setFreeVersion(boolean freeVersion) {
+		this.freeVersion = freeVersion;
+	}
+
 	public void setGlobals(Globals globals) {
 		this.globals = globals;
 	}
@@ -179,7 +199,7 @@ public class BluetoothNotifyWorker extends Activity {
 		// installed.
 		AlertDialog.Builder alertbox = new AlertDialog.Builder(this.parent);
 
-		if (getGlobals().isFreeVersion() == true) {
+		if (isFreeVersion() == true) {
 			alertbox.setMessage("WARNING: Another version of Bluetooth Notify detected!\n\n"
 					+ "You are trying to launch Bluetooth Notify (Free) while "
 					+ "the full version of Bluetooth Notify is installed on this device.\n\n"

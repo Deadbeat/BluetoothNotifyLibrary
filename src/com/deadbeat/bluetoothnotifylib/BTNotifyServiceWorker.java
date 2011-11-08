@@ -3,8 +3,10 @@ package com.deadbeat.bluetoothnotifylib;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -23,6 +25,7 @@ import android.widget.Toast;
 public class BTNotifyServiceWorker extends Activity {
 
 	private boolean barEnabled;
+
 	private String deviceName = "Unknown Device";
 	// Properties for device
 	private boolean enabled;
@@ -46,8 +49,8 @@ public class BTNotifyServiceWorker extends Activity {
 	/**
 	 * Constructor
 	 */
-	protected BTNotifyServiceWorker(Service parent, Globals globals) {
-		setGlobals(globals);
+	protected BTNotifyServiceWorker(Service parent) {
+		setGlobals(new Globals());
 		setParent(parent);
 	}
 
@@ -266,6 +269,13 @@ public class BTNotifyServiceWorker extends Activity {
 			doLog("Requested device property (" + propertyKey + ") was not found");
 			return null;
 		}
+	}
+
+	public String getTimestamp() {
+		Date todaysDate = new java.util.Date();
+		SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy/HH:mm:ss");
+		String formattedDate = formatter.format(todaysDate);
+		return formattedDate;
 	}
 
 	/**

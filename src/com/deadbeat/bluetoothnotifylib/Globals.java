@@ -16,11 +16,9 @@ public class Globals implements Serializable {
 	private String deviceDisconnected = "deviceDisconnected";
 	private String extraDevice = "android.bluetooth.device.extra.DEVICE";
 
-	private boolean freeVersion;
-
 	private int ledNotification = 279827593;
 
-	private boolean loggingEnabled;
+	private boolean loggingEnabled = true;
 
 	private String logPrefix = "BluetoothNotify";
 
@@ -132,20 +130,20 @@ public class Globals implements Serializable {
 		return this.prefVibrateShortLong;
 	}
 
-	public boolean isFreeVersion() {
-		return this.freeVersion;
-	}
+	// public boolean isFreeVersion() {
+	// return this.freeVersion;
+	// }
 
 	public boolean isLoggingEnabled() {
 		return this.loggingEnabled;
 	}
 
-	public void setFreeVersion(boolean freeVersion) {
-		this.freeVersion = freeVersion;
-	}
-
-	public void setLoggingEnabled(boolean loggingEnabled) {
-		this.loggingEnabled = loggingEnabled;
-	}
+	// public void setFreeVersion(boolean freeVersion) {
+	// this.freeVersion = freeVersion;
+	// }
+	//
+	// public void setLoggingEnabled(boolean loggingEnabled) {
+	// this.loggingEnabled = loggingEnabled;
+	// }
 
 }
