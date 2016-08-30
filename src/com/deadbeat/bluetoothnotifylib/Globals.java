@@ -37,6 +37,7 @@ public class Globals implements Serializable {
 	private int prefVibrateMultiShort = 5;
 	private int prefVibrateShort = 2;
 	private int prefVibrateShortLong = 7;
+	private boolean freeVersion;
 
 	public String getActionACLConnected() {
 		return this.actionACLConnected;
@@ -130,20 +131,20 @@ public class Globals implements Serializable {
 		return this.prefVibrateShortLong;
 	}
 
-	// public boolean isFreeVersion() {
-	// return this.freeVersion;
-	// }
+//	public boolean isFreeVersion() {
+//		return this.freeVersion;
+//	}
 
 	public boolean isLoggingEnabled() {
 		return this.loggingEnabled;
 	}
 
-	// public void setFreeVersion(boolean freeVersion) {
-	// this.freeVersion = freeVersion;
-	// }
-	//
-	// public void setLoggingEnabled(boolean loggingEnabled) {
-	// this.loggingEnabled = loggingEnabled;
-	// }
+//	public void setFreeVersion(boolean freeVersion) {
+//		this.freeVersion = freeVersion;
+//	}
+
+	public void setLoggingEnabled(boolean loggingEnabled) {
+		this.loggingEnabled = loggingEnabled;
+	}
 
 }

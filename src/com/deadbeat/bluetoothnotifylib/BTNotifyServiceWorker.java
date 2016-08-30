@@ -34,6 +34,7 @@ public class BTNotifyServiceWorker extends Activity {
 	private boolean ledEnabled;
 	private Notification ledNotification = new Notification();
 	private String ledOption;
+	private NotificationManager nManager;
 	private Notification notification;
 	private Service parent;
 	private Properties properties = new Properties();
@@ -119,6 +120,9 @@ public class BTNotifyServiceWorker extends Activity {
 		// to the object when it's created
 		if (this.barEnabled) {
 			int notifyIcon = R.drawable.icon;
+
+			nManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
 			CharSequence tickerText = this.deviceName
 					+ (type.equals(getGlobals().getActionACLConnected()) ? " connected" : " disconnected");
 			long when = System.currentTimeMillis();
@@ -136,7 +140,9 @@ public class BTNotifyServiceWorker extends Activity {
 
 			PendingIntent contentIntent = PendingIntent.getActivity(this.parent, 0, notificationIntent,
 					Intent.FLAG_ACTIVITY_NEW_TASK);
-			this.notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+			//this.notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+			//Notification.Builder builder = new Notification.Builder(this.parent);
+
 			doLog("Updated notification object");
 		}
 		// Otherwise, we can just make a simple object.
