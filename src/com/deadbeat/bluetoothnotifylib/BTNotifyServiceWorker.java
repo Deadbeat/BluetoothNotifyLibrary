@@ -34,15 +34,18 @@ public class BTNotifyServiceWorker extends Activity {
 	private boolean ledEnabled;
 	private Notification ledNotification = new Notification();
 	private String ledOption;
-	private NotificationManager nManager;
 	private Notification notification;
 	private Service parent;
 	private Properties properties = new Properties();
 
 	private boolean ringEnabled;
 	private String ringOption;
+	private String speakThis;
 	private boolean toastEnabled;
+	private boolean ttsEnabled;
+
 	private long[] vibrateCustomPattern;
+
 	private boolean vibrateEnabled;
 
 	private int vibrateOption;
@@ -53,6 +56,15 @@ public class BTNotifyServiceWorker extends Activity {
 	protected BTNotifyServiceWorker(Service parent) {
 		setGlobals(new Globals());
 		setParent(parent);
+
+		// For some reason, we need to pre-bind the TTS service on the device.
+		// Hopefully this doesn't cause issues with other TTS apps.
+		doLog(">>> Startup: Binding TTS");
+		Context context = this.parent.getApplicationContext();
+		TtsProviderFactory ttsProviderImpl = TtsProviderFactory.getInstance();
+		if (ttsProviderImpl != null) {
+			ttsProviderImpl.init(context);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -120,9 +132,6 @@ public class BTNotifyServiceWorker extends Activity {
 		// to the object when it's created
 		if (this.barEnabled) {
 			int notifyIcon = R.drawable.icon;
-
-			nManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
 			CharSequence tickerText = this.deviceName
 					+ (type.equals(getGlobals().getActionACLConnected()) ? " connected" : " disconnected");
 			long when = System.currentTimeMillis();
@@ -140,9 +149,7 @@ public class BTNotifyServiceWorker extends Activity {
 
 			PendingIntent contentIntent = PendingIntent.getActivity(this.parent, 0, notificationIntent,
 					Intent.FLAG_ACTIVITY_NEW_TASK);
-			//this.notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
-			//Notification.Builder builder = new Notification.Builder(this.parent);
-
+			this.notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
 			doLog("Updated notification object");
 		}
 		// Otherwise, we can just make a simple object.
@@ -155,6 +162,12 @@ public class BTNotifyServiceWorker extends Activity {
 		 * Ok - Now all that's done, so lets start adding on all the other types
 		 * of notification the user may want.
 		 */
+
+		// Create TTS String
+		if (this.ttsEnabled) {
+			this.speakThis = this.deviceName
+					+ (type.equals(getGlobals().getActionACLConnected()) ? " connected" : " disconnected");
+		}
 
 		// Add Ringtone
 		if (this.ringEnabled) {
@@ -195,11 +208,22 @@ public class BTNotifyServiceWorker extends Activity {
 			// Set globals from properties
 			this.setGlobalsForDevice(stateChange, deviceAddress);
 
-			// Create notification object
-			this.createNotificationObject(stateChange);
+			/*
+			 * The following if statement is a hack and should be remedied
+			 * correctly. Variables are retaining state between device
+			 * connect/disconnect, and therefore notifications can be thrown
+			 * when a particular notification type is disabled. The below line
+			 * works as a temporary fix, but we should reset variable state
+			 * after notifications are thrown.
+			 */
 
-			// Make it so (yeah, Star Trek comment FTW!)
-			this.sendNotification();
+			if (this.enabled == true) {
+				// Create notification object
+				this.createNotificationObject(stateChange);
+
+				// Make it so
+				this.sendNotification();
+			}
 		}
 	}
 
@@ -295,6 +319,7 @@ public class BTNotifyServiceWorker extends Activity {
 		this.doLog("Sending main notification");
 		nm.notify(getGlobals().getBtNotification(), this.notification);
 		this.doLog("Notification sent");
+
 		// LED Notification sent separately, for single flash
 		if (this.ledEnabled) {
 			this.doLog("Sending LED notification");
@@ -305,6 +330,19 @@ public class BTNotifyServiceWorker extends Activity {
 			}
 			nm.cancel(getGlobals().getLedNotification());
 		}
+
+		// TTS Notification sent separately as well.
+		if (this.ttsEnabled) {
+
+			this.doLog("Sending TTS Notification");
+			Context context = this.parent.getApplicationContext();
+			TtsProviderFactory ttsProviderImpl = TtsProviderFactory.getInstance();
+			if (ttsProviderImpl != null) {
+				ttsProviderImpl.init(context);
+				ttsProviderImpl.say(this.speakThis);
+			}
+		}
+
 		this.doLog("Done with all notifications");
 	}
 
@@ -334,6 +372,7 @@ public class BTNotifyServiceWorker extends Activity {
 			if (this.enabled) {
 				this.ledEnabled = this.getBooleanProperty("pConnectLEDEnable");
 				this.ringEnabled = this.getBooleanProperty("pConnectRingtoneEnable");
+				this.ttsEnabled = this.getBooleanProperty("pConnectTTSEnable");
 				this.toastEnabled = this.getBooleanProperty("pConnectToastEnable");
 				this.barEnabled = this.getBooleanProperty("pConnectNotificationEnable");
 				this.vibrateEnabled = this.getBooleanProperty("pConnectVibrateEnable");
@@ -347,9 +386,14 @@ public class BTNotifyServiceWorker extends Activity {
 				this.ringOption = this.getStringProperty("pConnectRingtone");
 			}
 			if (this.vibrateEnabled) {
-				this.vibrateOption = Integer.valueOf(this.getStringProperty("pConnectVibratePattern"));
-				if (this.vibrateOption == getGlobals().getPrefVibrateCustom()) {
-					constructCustomVibratePattern(type);
+				try {
+					this.vibrateOption = Integer.valueOf(this.getStringProperty("pConnectVibratePattern"));
+					if (this.vibrateOption == getGlobals().getPrefVibrateCustom()) {
+						constructCustomVibratePattern(type);
+					}
+				} catch (NumberFormatException e) {
+					doLog("Caught Exception setting vibrate pattern");
+					e.printStackTrace();
 				}
 			}
 		} else if (type.equals(getGlobals().getActionACLDisconnected())) {
@@ -359,6 +403,7 @@ public class BTNotifyServiceWorker extends Activity {
 			if (this.enabled) {
 				this.ledEnabled = this.getBooleanProperty("pDisconnectLEDEnable");
 				this.ringEnabled = this.getBooleanProperty("pDisconnectRingtoneEnable");
+				this.ttsEnabled = this.getBooleanProperty("pDisconnectTTSEnable");
 				this.toastEnabled = this.getBooleanProperty("pDisconnectToastEnable");
 				this.barEnabled = this.getBooleanProperty("pDisconnectNotificationEnable");
 				this.vibrateEnabled = this.getBooleanProperty("pDisconnectVibrateEnable");
@@ -372,14 +417,19 @@ public class BTNotifyServiceWorker extends Activity {
 				this.ringOption = this.getStringProperty("pDisconnectRingtone");
 			}
 			if (this.vibrateEnabled) {
-				this.vibrateOption = Integer.valueOf(this.getStringProperty("pDisconnectVibratePattern"));
-				if (this.vibrateOption == getGlobals().getPrefVibrateCustom()) {
-					constructCustomVibratePattern(type);
+				try {
+					this.vibrateOption = Integer.valueOf(this.getStringProperty("pDisconnectVibratePattern"));
+					if (this.vibrateOption == getGlobals().getPrefVibrateCustom()) {
+						constructCustomVibratePattern(type);
+					}
+				} catch (NumberFormatException e) {
+					doLog("Caught Exception setting vibrate pattern");
+					e.printStackTrace();
 				}
 			}
 		}
 
-		if (this.toastEnabled || this.barEnabled) {
+		if (this.toastEnabled || this.barEnabled || this.ttsEnabled) {
 			// BluetoothDevice btd = btAdapter.getRemoteDevice(address);
 			this.deviceName = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(address).getName();
 			this.doLog("Got device name: " + this.deviceName);

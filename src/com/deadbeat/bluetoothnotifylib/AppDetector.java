@@ -12,7 +12,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 public class AppDetector {
 	/**
 	 * getVersion Desc: Get the version tag of the app at specified URI
-	 * 
+	 *
 	 * @param parent
 	 * @param uri
 	 * @return

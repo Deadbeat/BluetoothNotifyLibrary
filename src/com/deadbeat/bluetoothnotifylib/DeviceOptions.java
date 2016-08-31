@@ -22,12 +22,14 @@ import android.widget.Toast;
 
 public class DeviceOptions extends PreferenceActivity {
 	private CheckBoxPreference cRingtoneCheckBoxPreference;
+	private CheckBoxPreference cTTSCheckboxPreference;
+
 	private CheckBoxPreference cVibrateCheckboxPreference;
 
 	String deviceAddress;
-
 	String deviceName;
 	private CheckBoxPreference dRingtoneCheckBoxPreference;
+	private CheckBoxPreference dTTSCheckboxPreference;
 	private CheckBoxPreference dVibrateCheckboxPreference;
 	private boolean freeVersion;
 	private Globals globals;
@@ -42,6 +44,7 @@ public class DeviceOptions extends PreferenceActivity {
 	private String pConnectRingtone;
 	private boolean pConnectRingtoneEnable;
 	private boolean pConnectToastEnable;
+	private boolean pConnectTTSEnable;
 	private boolean pConnectVibrateEnable;
 	private String pConnectVibratePattern;
 	// Device Enabled
@@ -49,14 +52,15 @@ public class DeviceOptions extends PreferenceActivity {
 	private String pDisconnectCustomPattern;
 	// Disconnect Variables
 	private boolean pDisconnectEnable;
+
 	private String pDisconnectLEDColor;
-
 	private boolean pDisconnectLEDEnable;
-	private boolean pDisconnectNotificationEnable;
 
+	private boolean pDisconnectNotificationEnable;
 	private String pDisconnectRingtone;
 	private boolean pDisconnectRingtoneEnable;
 	private boolean pDisconnectToastEnable;
+	private boolean pDisconnectTTSEnable;
 	private boolean pDisconnectVibrateEnable;
 	private String pDisconnectVibratePattern;
 	PreferenceActivity preferenceActivity;
@@ -77,6 +81,7 @@ public class DeviceOptions extends PreferenceActivity {
 		this.pConnectRingtoneEnable = this.prefs.getBoolean("pref_connect_ringtone_enable", true);
 		this.pConnectRingtone = this.prefs.getString("pref_connect_ringtone",
 				"content://settings/system/notification_sound");
+		this.pConnectTTSEnable = this.prefs.getBoolean("pref_connect_tts_enable", false);
 		this.pConnectLEDEnable = this.prefs.getBoolean("pref_connect_led_enable", false);
 		this.pConnectLEDColor = this.prefs.getString("pref_connect_led_color", "ff0000ff");
 		this.pConnectNotificationEnable = this.prefs.getBoolean("pref_connect_notification_enable", false);
@@ -98,6 +103,7 @@ public class DeviceOptions extends PreferenceActivity {
 		this.pDisconnectRingtoneEnable = this.prefs.getBoolean("pref_disconnect_ringtone_enable", true);
 		this.pDisconnectRingtone = this.prefs.getString("pref_disconnect_ringtone",
 				"content://settings/system/notification_sound");
+		this.pDisconnectTTSEnable = this.prefs.getBoolean("pref_disconnect_tts_enable", false);
 		this.pDisconnectLEDEnable = this.prefs.getBoolean("pref_disconnect_led_enable", false);
 		this.pDisconnectLEDColor = this.prefs.getString("pref_disconnect_led_color", "ff0000ff");
 		this.pDisconnectNotificationEnable = this.prefs.getBoolean("pref_disconnect_notification_enable", false);
@@ -299,11 +305,28 @@ public class DeviceOptions extends PreferenceActivity {
 			this.dVibrateCheckboxPreference.setSelectable(false);
 			this.dVibrateCheckboxPreference.setChecked(false);
 
+			// Disable TTS
+			this.cTTSCheckboxPreference = (CheckBoxPreference) getPreferenceScreen().findPreference(
+					"pref_connect_tts_enable");
+			this.cTTSCheckboxPreference
+					.setSummary("Disabled in the free version.\nGet the full version to enable this option.");
+			this.cTTSCheckboxPreference.setSelectable(false);
+			this.cTTSCheckboxPreference.setChecked(false);
+
+			this.dTTSCheckboxPreference = (CheckBoxPreference) getPreferenceScreen().findPreference(
+					"pref_connect_tts_enable");
+			this.dTTSCheckboxPreference
+					.setSummary("Disabled in the free version.\nGet the full version to enable this option.");
+			this.dTTSCheckboxPreference.setSelectable(false);
+			this.dTTSCheckboxPreference.setChecked(false);
+
 			Editor prefsEditor = this.prefs.edit();
 			prefsEditor.putBoolean("pref_connect_ringtone_enable", false);
 			prefsEditor.putBoolean("pref_disconnect_ringtone_enable", false);
 			prefsEditor.putBoolean("pref_connect_vibrate_enable", false);
 			prefsEditor.putBoolean("pref_disconnect_vibrate_enable", false);
+			prefsEditor.putBoolean("pref_connect_tts_enable", false);
+			prefsEditor.putBoolean("pref_disconnect_tts_enable", false);
 			prefsEditor.commit();
 		}
 
@@ -353,6 +376,7 @@ public class DeviceOptions extends PreferenceActivity {
 		properties.setProperty("pConnectEnable", new Boolean(this.pConnectEnable).toString());
 		properties.setProperty("pConnectRingtoneEnable", new Boolean(this.pConnectRingtoneEnable).toString());
 		properties.setProperty("pConnectRingtone", this.pConnectRingtone);
+		properties.setProperty("pConnectTTSEnable", new Boolean(this.pConnectTTSEnable).toString());
 		properties.setProperty("pConnectLEDEnable", new Boolean(this.pConnectLEDEnable).toString());
 		properties.setProperty("pConnectLEDColor", this.pConnectLEDColor);
 		properties.setProperty("pConnectNotificationEnable", new Boolean(this.pConnectNotificationEnable).toString());
@@ -365,10 +389,11 @@ public class DeviceOptions extends PreferenceActivity {
 		properties.setProperty("pDisconnectEnable", new Boolean(this.pDisconnectEnable).toString());
 		properties.setProperty("pDisconnectRingtoneEnable", new Boolean(this.pDisconnectRingtoneEnable).toString());
 		properties.setProperty("pDisconnectRingtone", this.pDisconnectRingtone);
+		properties.setProperty("pDisconnectTTSEnable", new Boolean(this.pDisconnectTTSEnable).toString());
 		properties.setProperty("pDisconnectLEDEnable", new Boolean(this.pDisconnectLEDEnable).toString());
 		properties.setProperty("pDisconnectLEDColor", this.pDisconnectLEDColor);
-		properties.setProperty("pDisconnectNotificationEnable", new Boolean(this.pDisconnectNotificationEnable)
-				.toString());
+		properties.setProperty("pDisconnectNotificationEnable",
+				new Boolean(this.pDisconnectNotificationEnable).toString());
 		properties.setProperty("pDisconnectToastEnable", new Boolean(this.pDisconnectToastEnable).toString());
 		properties.setProperty("pDisconnectVibrateEnable", new Boolean(this.pDisconnectVibrateEnable).toString());
 		properties.setProperty("pDisconnectVibratePattern", this.pDisconnectVibratePattern);
